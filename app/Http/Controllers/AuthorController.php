@@ -35,7 +35,7 @@ class AuthorController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('books.create')
+            return redirect()->route('authors.create')
                 ->withErrors($validator)
                 ->withInput();
         }
