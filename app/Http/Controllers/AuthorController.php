@@ -7,10 +7,27 @@ use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
-use DateTime;
+
 
 class AuthorController extends Controller
 {
+    public function index()
+    {
+        $authors = Author::all();
+        $books = Book::all();
+
+        $data = [
+            'authors' => $authors,
+            'books' => $books
+        ];
+        return view('index')->with($data);
+    }
+
+    public function create()
+    {
+        return view('create');
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -24,18 +41,21 @@ class AuthorController extends Controller
         }
 
         $file = $request->file('file');
-        $fileContents = file($file->getPathname());
+        $fileRows = file($file->getPathname());
 
-        foreach ($fileContents as $line) {
-            $data = str_getcsv($line);
+        foreach ($fileRows as $row) {
+            $data = str_getcsv($row);
             if (!is_numeric(strtotime($data[2]))) {
                 continue;
             } else {
                 $birthDate = Carbon::parse($data[2]);
                 $useBirthDate = $birthDate->format('Y-m-d');
-
-                $deathDate = Carbon::parse($data[3]);
-                $useDeathDate = $deathDate->format('Y-m-d');
+                if ($data[3] === '') {
+                    $useDeathDate = null;
+                } else {
+                    $deathDate = Carbon::parse($data[3]);
+                    $useDeathDate = $deathDate->format('Y-m-d');
+                }
                 $author = Author::create([
                     'first_name' => $data[0],
                     'last_name' => $data[1],
@@ -50,10 +70,9 @@ class AuthorController extends Controller
                         'author_id' => $author->id,
                         'name' => $book
                     ]);
-
                 }
             }
         }
-        return redirect()->route('books.index');
+        return redirect()->route('authors.index');
     }
 }

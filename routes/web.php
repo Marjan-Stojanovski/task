@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
-Route::get('/', [App\Http\Controllers\BookController::class, 'index'])->name('books.index');
-Route::get('/create', [App\Http\Controllers\BookController::class, 'create'])->name('books.create');
+Route::get('/', [App\Http\Controllers\AuthorController::class, 'index'])->name('authors.index');
+Route::get('/create', [App\Http\Controllers\AuthorController::class, 'create'])->name('authors.create');
 Route::post('/store', [App\Http\Controllers\AuthorController::class, 'store'])->name('file.store');
