@@ -7,6 +7,7 @@ use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 
 class AuthorController extends Controller
@@ -56,20 +57,37 @@ class AuthorController extends Controller
                     $deathDate = Carbon::parse($data[3]);
                     $useDeathDate = $deathDate->format('Y-m-d');
                 }
-                $author = Author::create([
-                    'first_name' => $data[0],
-                    'last_name' => $data[1],
-                    'birth_date' => $useBirthDate,
-                    'death_date' => $useDeathDate,
-                    'nobel_price' => $data[5],
-                ]);
-
+                $getAuthor = Author::where('first_name', $data[0])->first();
                 $books = str_getcsv($data[4]);
-                foreach ($books as $book) {
-                    Book::create([
-                        'author_id' => $author->id,
-                        'name' => $book
+
+                if (!$getAuthor) {
+                    $author = Author::create([
+                        'first_name' => $data[0],
+                        'last_name' => $data[1],
+                        'birth_date' => $useBirthDate,
+                        'death_date' => $useDeathDate,
+                        'nobel_price' => $data[5],
                     ]);
+                    foreach ($books as $book) {
+                        Book::create([
+                            'author_id' => $author->id,
+                            'name' => $book,
+                            'slug' => Str::slug($book)
+                        ]);
+                    }
+                } else {
+                    foreach ($books as $book) {
+                        $getBooks = Book::where('author_id', $getAuthor->id)
+                            ->where('slug', Str::slug($book))->first();
+
+                        if (!$getBooks) {
+                            Book::create([
+                                'author_id' => $getAuthor->id,
+                                'name' => $book,
+                                'slug' => Str::slug($book)
+                            ]);
+                        }
+                    }
                 }
             }
         }

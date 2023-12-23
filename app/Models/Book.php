@@ -14,6 +14,7 @@ class Book extends Model
     protected $fillable = [
         'author_id',
         'name',
+        'slug',
     ];
 
     public function author()
